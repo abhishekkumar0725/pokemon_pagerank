@@ -8,15 +8,20 @@ def readCSV():
     df = pd.read_csv('effectiveness.csv')
     return df
 
-def buildGraph(df):
+def buildAttackGraph(df):
     edges = []
     for index, row in df.iterrows():
         if row['Effectiveness'] == 2 and row['Attacking'] != row['Defending']:
             edge = [row['Defending'], row['Attacking'], 1]
             edges.append(edge)
-        #if row['Effectiveness'] == .5 and row['Attacking'] != row['Defending']:
-        #    edge = [row['Defending'], row['Attacking'], -1]
-        #    edges.append(edge) 
+    return edges
+
+def buildDefendGraph(df):
+    edges = []
+    for index, row in df.iterrows():
+        if row['Effectiveness'] == .5 and row['Attacking'] != row['Defending']:
+            edge = [row['Attacking'], row['Defending'], 1]
+            edges.append(edge)
     return edges
 
 def typesDict():
@@ -27,7 +32,6 @@ def typesDict():
     numberMap = {}
     for i, type in enumerate(types):
         numberMap[type] = i
-    
     return numberMap
 
 def pagerank(graph, p=.85):
@@ -36,9 +40,11 @@ def pagerank(graph, p=.85):
     translation = typesDict()
 
     for edge in graph:
-        defend = translation[edge[0]]
-        attack = translation[edge[1]]
-        adjacencyMatrix[attack][defend] = 1
+        if edge[0] == 'A':
+            print(edge)
+        transition = translation[edge[0]]
+        start = translation[edge[1]]
+        adjacencyMatrix[start][transition] = 1
     
     adjacencyMatrix = np.array(adjacencyMatrix)
     A = sparse.csr_matrix(adjacencyMatrix,dtype=np.float)
@@ -60,6 +66,6 @@ def pagerank(graph, p=.85):
 
 if __name__ == '__main__':
     df = readCSV()
-    edges = buildGraph(df)
+    edges = buildAttackGraph(df)
     ranks = pagerank(graph=edges)
     print(ranks)
